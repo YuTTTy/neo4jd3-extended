@@ -759,6 +759,16 @@ function tickNodes() {
 
 function tickRelationships() {
   if (relationship) {
+
+    for (var i=0; i<relationship.length; i++) {
+        if (i != 0 &&
+            links[i].source == links[i-1].source &&
+            links[i].target == links[i-1].target) {
+                links[i].linknum = links[i-1].linknum + 1;
+            }
+        else {links[i].linknum = 1;};
+    }
+
     relationship.attr('transform', function(d) {
       var angle = rotation(d.source, d.target);
       return 'translate(' + d.source.x + ', ' + d.source.y + ') rotate(' + angle + ')';
@@ -771,7 +781,7 @@ function tickRelationships() {
 }
 
 function tickRelationshipsOutlines() {
-  relationship.each(function(relationship) {
+  relationship.each(function(index, relationship) {
     var rel = d3.select(this),
     outline = rel.select('.outline'),
     text = rel.select('.text'),
@@ -799,18 +809,11 @@ function tickRelationshipsOutlines() {
       rotatedPointF2 = rotatePoint(center, { x: d.target.x - d.source.x - (options.nodeRadius + 1) * u.x - u.x * options.arrowSize, y: d.target.y - d.source.y - (options.nodeRadius + 1) * u.y - u.y * options.arrowSize }, angle),
       rotatedPointG2 = rotatePoint(center, { x: d.target.x - d.source.x - textMargin.x, y: d.target.y - d.source.y - textMargin.y }, angle);
 
-      return 'M ' + rotatedPointA1.x + ' ' + rotatedPointA1.y +
-      ' L ' + rotatedPointB1.x + ' ' + rotatedPointB1.y +
-      ' L ' + rotatedPointC1.x + ' ' + rotatedPointC1.y +
-      ' L ' + rotatedPointD1.x + ' ' + rotatedPointD1.y +
-      ' Z M ' + rotatedPointA2.x + ' ' + rotatedPointA2.y +
-      ' L ' + rotatedPointB2.x + ' ' + rotatedPointB2.y +
-      ' L ' + rotatedPointC2.x + ' ' + rotatedPointC2.y +
-      ' L ' + rotatedPointD2.x + ' ' + rotatedPointD2.y +
-      ' L ' + rotatedPointE2.x + ' ' + rotatedPointE2.y +
-      ' L ' + rotatedPointF2.x + ' ' + rotatedPointF2.y +
-      ' L ' + rotatedPointG2.x + ' ' + rotatedPointG2.y +
-      ' Z';
+      var origin = rotatePoint(center, { x: 0 + (options.nodeRadius + 1) * u.x - n.x, y: 0 + (options.nodeRadius + 1) * u.y - n.y }, angle),
+      destination = rotatePoint(center, { x: d.target.x - d.source.x - (options.nodeRadius + 1) * u.x, y: d.target.y - d.source.y - (options.nodeRadius + 1) * u.y}, angle),
+      dr = 100/d.linknum
+
+      return "M" + origin.x + "," + origin.y + "A" + dr + "," + dr + " 0 0,1 " + destination.x + "," + destination.y;
     });
   });
 }
